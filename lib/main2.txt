@@ -1,7 +1,6 @@
 //final green screen + home screen video preview + pause in every five second
-// + pause (interval) screen with continue button (finish)
 
-import 'dart:async';
+import 'dart:async'; // Import for Timer
 
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -113,10 +112,7 @@ class VideoPlayerScreen extends StatefulWidget {
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late YoutubePlayerController _controller;
   bool _isVideoEnded = false;
-  bool _showIntervalScreen = false;
-  late Timer _timer;
-  int _intervalCount = 0;
-  int _lastIntervalTime = 0;
+  late Timer _timer; // Timer to periodically check the video time
 
   @override
   void initState() {
@@ -132,48 +128,28 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         loop: false,
         controlsVisibleAtStart: true,
       ),
-    )..addListener(_onControllerUpdate);
-
-    _timer = Timer.periodic(Duration(seconds: 1), _onTimerTick);
-  }
-
-  void _onControllerUpdate() {
-    if (_controller.value.playerState == PlayerState.ended) {
-      setState(() {
-        _isVideoEnded = true;
+    )..addListener(() {
+        if (_controller.value.playerState == PlayerState.ended) {
+          setState(() {
+            _isVideoEnded = true;
+          });
+        }
       });
-    }
-  }
 
-  void _onTimerTick(Timer timer) {
-    if (!_controller.value.isPlaying) return;
-
-    final currentTime = _controller.value.position.inSeconds;
-    if (currentTime % 5 == 0 &&
-        currentTime != 0 &&
-        currentTime != _lastIntervalTime) {
-      _lastIntervalTime = currentTime;
-      _controller.pause();
-      setState(() {
-        _showIntervalScreen = true;
-        _intervalCount++;
-      });
-    }
+    // Start the timer to check the video time every 1 second
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      final currentTime = _controller.value.position.inSeconds;
+      if (currentTime % 5 == 0 && currentTime != 0) {
+        _controller.pause(); // Pause video every 5 seconds
+      }
+    });
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_onControllerUpdate);
     _controller.dispose();
-    _timer.cancel();
+    _timer.cancel(); // Cancel the timer when the screen is disposed
     super.dispose();
-  }
-
-  void _onFinishPressed() {
-    setState(() {
-      _showIntervalScreen = false;
-    });
-    _controller.play();
   }
 
   @override
@@ -208,48 +184,20 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 ],
               ),
             )
-          : Stack(
-              children: [
-                Center(
-                  child: YoutubePlayerBuilder(
-                    player: YoutubePlayer(
-                      controller: _controller,
-                      showVideoProgressIndicator: true,
-                    ),
-                    builder: (context, player) {
-                      return Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        child: player,
-                      );
-                    },
-                  ),
+          : Center(
+              child: YoutubePlayerBuilder(
+                player: YoutubePlayer(
+                  controller: _controller,
+                  showVideoProgressIndicator: true,
                 ),
-                if (_showIntervalScreen)
-                  Container(
-                    color: Colors.red.withOpacity(0.8),
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Interval ${_intervalCount}',
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _onFinishPressed,
-                          child: Text('Finish'),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
+                builder: (context, player) {
+                  return Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    child: player,
+                  );
+                },
+              ),
             ),
     );
   }
