@@ -64,18 +64,31 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                 final item = _playlistItems[index];
                 final title = item['snippet']['title'];
                 final videoId = item['snippet']['resourceId']['videoId'];
+                final thumbnailUrl =
+                    item['snippet']['thumbnails']['medium']['url'];
 
-                return ListTile(
-                  title: Text(title),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            VideoPlayerScreen(videoId: videoId),
-                      ),
-                    );
-                  },
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.all(10),
+                    leading: Image.network(
+                      thumbnailUrl,
+                      width: 100,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
+                    title: Text(title,
+                        maxLines: 2, overflow: TextOverflow.ellipsis),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              VideoPlayerScreen(videoId: videoId),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),
