@@ -1,3 +1,5 @@
+import 'dart:async'; // Import for Timer
+
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -108,6 +110,7 @@ class VideoPlayerScreen extends StatefulWidget {
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late YoutubePlayerController _controller;
   bool _isVideoEnded = false;
+  late Timer _timer; // Timer to periodically check the video time
 
   @override
   void initState() {
@@ -130,11 +133,20 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           });
         }
       });
+
+    // Start the timer to check the video time every 1 second
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      final currentTime = _controller.value.position.inSeconds;
+      if (currentTime % 5 == 0 && currentTime != 0) {
+        _controller.pause(); // Pause video every 5 seconds
+      }
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _timer.cancel(); // Cancel the timer when the screen is disposed
     super.dispose();
   }
 
