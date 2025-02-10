@@ -1,3 +1,7 @@
+//final green screen + home screen video preview + pause in every five second
+// + pause (interval) screen with continue button (finish)" + hide KP Video Player app bar double tap
+
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
