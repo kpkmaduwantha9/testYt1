@@ -1,3 +1,7 @@
+// 1- final green screen + home screen video preview + pause in every five second
+// 2- + pause (interval) screen with continue button (finish)" {code in github}+ hide KP Video Player app bar double tap
+// 3 - + add next video button to final screen
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -13,6 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'YouTube Playlist App',
       theme: ThemeData(
         primarySwatch: Colors.red,
@@ -85,8 +90,11 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              VideoPlayerScreen(videoId: videoId),
+                          builder: (context) => VideoPlayerScreen(
+                            videoId: videoId,
+                            playlistItems: _playlistItems,
+                            currentIndex: index,
+                          ),
                         ),
                       );
                     },
@@ -100,8 +108,14 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
 class VideoPlayerScreen extends StatefulWidget {
   final String videoId;
+  final List<dynamic> playlistItems;
+  final int currentIndex;
 
-  VideoPlayerScreen({required this.videoId});
+  VideoPlayerScreen({
+    required this.videoId,
+    required this.playlistItems,
+    required this.currentIndex,
+  });
 
   @override
   _VideoPlayerScreenState createState() => _VideoPlayerScreenState();
@@ -180,6 +194,27 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     });
   }
 
+  void _playNextVideo() {
+    final nextIndex = widget.currentIndex + 1;
+    if (nextIndex < widget.playlistItems.length) {
+      final nextVideoId =
+          widget.playlistItems[nextIndex]['snippet']['resourceId']['videoId'];
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VideoPlayerScreen(
+            videoId: nextVideoId,
+            playlistItems: widget.playlistItems,
+            currentIndex: nextIndex,
+          ),
+        ),
+      );
+    } else {
+      // If there are no more videos, go back to the home screen
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,6 +245,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                       Navigator.pop(context);
                     },
                     child: Text('Home'),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _playNextVideo,
+                    child: Text('Next Video'),
                   ),
                 ],
               ),
