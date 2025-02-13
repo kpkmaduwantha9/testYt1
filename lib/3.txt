@@ -1,6 +1,6 @@
 // 1- final green screen + home screen video preview + pause in every five second
 // 2- + pause (interval) screen with continue button (finish)" {code in github}+ hide KP Video Player app bar double tap
-// 3 - + add next video button to final screen + auto play next video in 5 second
+// 3 - + add next video button to final screen
 
 import 'dart:async';
 
@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'YouTube Playlist App',
       theme: ThemeData(
         primarySwatch: Colors.red,
@@ -128,8 +129,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   int _intervalCount = 0;
   int _lastIntervalTime = 0;
   bool _isAppBarVisible = true;
-  int _countdown = 5; // Countdown timer
-  late Timer _countdownTimer; // Timer for countdown
 
   @override
   void initState() {
@@ -154,7 +153,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     if (_controller.value.playerState == PlayerState.ended) {
       setState(() {
         _isVideoEnded = true;
-        _startCountdown(); // Start countdown when video ends
       });
     }
   }
@@ -175,25 +173,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     }
   }
 
-  void _startCountdown() {
-    _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (_countdown > 0) {
-        setState(() {
-          _countdown--;
-        });
-      } else {
-        _countdownTimer.cancel();
-        _playNextVideo(); // Automatically play the next video
-      }
-    });
-  }
-
   @override
   void dispose() {
     _controller.removeListener(_onControllerUpdate);
     _controller.dispose();
     _timer.cancel();
-    _countdownTimer.cancel(); // Cancel the countdown timer
     super.dispose();
   }
 
@@ -266,14 +250,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   ElevatedButton(
                     onPressed: _playNextVideo,
                     child: Text('Next Video'),
-                  ),
-                  SizedBox(height: 10), // Add some spacing
-                  Text(
-                    'Next video in $_countdown seconds',
-                    style: TextStyle(
-                      fontSize: 16, // Smaller font size
-                      color: Colors.white,
-                    ),
                   ),
                 ],
               ),
